@@ -1,6 +1,6 @@
 :root {
   --bg-page: #f9f8f5;
-    --bg-image: url('Gás.jpg'); /* variável para a imagem */
+  --bg-image: url('bg2.jpg');
   --surface-1: #daddd9;
   --surface-2: #f1efe8;
   --text-primary: #0b0b0b;

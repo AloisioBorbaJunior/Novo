@@ -1,0 +1,7 @@
+{
+    "name": "Python - Minimal",
+    "image": "mcr.microsoft.com/devcontainers/python:3.8",
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {}
+    }
+}

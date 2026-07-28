@@ -1,0 +1,20 @@
+{
+  "name": "typescript-project",
+  "version": "1.0.0",
+  "description": "Projeto TypeScript",
+  "main": "dist/typescript.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/typescript.js",
+    "dev": "ts-node typescript.ts",
+    "watch": "tsc --watch"
+  },
+  "keywords": ["typescript", "nodejs"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0"
+  }
+}
