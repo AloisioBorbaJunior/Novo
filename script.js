@@ -42,7 +42,16 @@ let receitaProdutoChart = null;
 // ==========================================
 
 function formatarMoeda(valor) {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const numero = Number(valor);
+  if (Number.isNaN(numero)) return 'R$ 0,00';
+  return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function definirTexto(id, valor) {
+  const elemento = document.getElementById(id);
+  if (elemento) {
+    elemento.textContent = valor;
+  }
 }
 
 function hojeISO() {
@@ -102,6 +111,7 @@ function renderProdutos() {
       <td class="right">${formatarMoeda(p.custo)}</td>
       <td class="right">${formatarMoeda(p.venda)}</td>
       <td class="right ${p.quantidade <= 5 ? 'qtd-baixa' : ''}">${p.quantidade}</td>
+      <td class="right">${formatarMoeda(p.venda - p.custo)}</td>
       <td class="right">
         <button class="btn-icon" onclick="removerProduto(${p.id})" aria-label="Remover produto">
           <i class="ti ti-trash"></i>
@@ -112,7 +122,7 @@ function renderProdutos() {
 }
 
 function removerProduto(id) {
-  if (!confirm('Remover este produto do cadastro?')) return;
+  if (!confirm) return;
   produtos = produtos.filter(p => p.id !== id);
   salvarProdutos();
   renderProdutos();
@@ -251,6 +261,8 @@ function inicializarFormVenda() {
 
     produto.quantidade -= quantidade;
 
+    const lucroVenda = (produto.venda - produto.custo) * quantidade;
+
     vendas.push({
       id: proximoIdVenda++,
       produtoId: produto.id,
@@ -259,6 +271,7 @@ function inicializarFormVenda() {
       precoUnitario: produto.venda,
       precoCusto: produto.custo,
       total: produto.venda * quantidade,
+      lucro: lucroVenda,
       data,
       hora
     });
@@ -290,15 +303,21 @@ function renderBalanco() {
   const dataISO = document.getElementById('dataFiltro').value || hojeISO();
   const doDia = vendasDoDia(dataISO);
 
-  const receita = doDia.reduce((acc, v) => acc + v.total, 0);
-  const custo = doDia.reduce((acc, v) => acc + v.precoCusto * v.quantidade, 0);
-  const lucro = receita - custo;
-  const itens = doDia.reduce((acc, v) => acc + v.quantidade, 0);
+  const receita = Number(doDia.reduce((acc, v) => acc + (Number(v.total) || 0), 0)) || 0;
+  const custo = Number(doDia.reduce((acc, v) => acc + (Number(v.precoCusto) || 0) * (Number(v.quantidade) || 0), 0)) || 0;
+  const lucro = Number(doDia.reduce((acc, v) => acc + (Number(v.lucro) || 0), 0)) || 0;
+  const itens = Number(doDia.reduce((acc, v) => acc + (Number(v.quantidade) || 0), 0)) || 0;
 
-  document.getElementById('dReceita').textContent = formatarMoeda(receita);
-  document.getElementById('dCusto').textContent = formatarMoeda(custo);
-  document.getElementById('dLucro').textContent = formatarMoeda(lucro);
-  document.getElementById('dItens').textContent = itens;
+  definirTexto('dReceita', formatarMoeda(receita));
+  definirTexto('dCusto', formatarMoeda(custo));
+  definirTexto('dLucro', formatarMoeda(lucro));
+  definirTexto('dItens', itens);
+
+  const lucroElemento = document.getElementById('dLucro');
+  if (lucroElemento) {
+    lucroElemento.innerHTML = formatarMoeda(lucro);
+    
+  }
 
   // Tabela de vendas do dia
   const tbody = document.getElementById('vendasDiaBody');
@@ -310,14 +329,24 @@ function renderBalanco() {
   } else {
     vazio.style.display = 'none';
     const ordenadas = [...doDia].sort((a, b) => a.hora.localeCompare(b.hora));
+    const lucroTotal = ordenadas.reduce((soma, v) => soma + (Number(v.lucro) || 0), 0);
     tbody.innerHTML = ordenadas.map(v => `
       <tr>
         <td>${v.hora}</td>
         <td>${v.produtoNome}</td>
         <td>${v.quantidade}</td>
         <td class="right">${formatarMoeda(v.total)}</td>
+        <td class="right">${formatarMoeda(v.lucro)}</td>
       </tr>
     `).join('');
+
+     // 👉 Adiciona a linha final com o total de lucros
+  tbody.innerHTML += `
+    <tr class="total">
+      <td colspan="4" class="right"><strong>Lucro Total do Dia:</strong></td>
+      <td class="right"><strong>${formatarMoeda(lucroTotal)}</strong></td>
+    </tr>
+  `;
   }
 
   renderGraficoReceitaProduto(doDia);
@@ -395,26 +424,48 @@ document.addEventListener('DOMContentLoaded', () => {
   renderBalanco();
 });
 
-document.getElementById("downloadBtn").addEventListener("click", function() {
-  // Captura os dados da tabela
-  const linhas = document.querySelectorAll("#vendasDiaBody tr");
-  let conteudo = "Lista de Produtos:\n\n";
+ document.getElementById("downloadBtn").addEventListener("click", function() {
+    // Captura os dados da tabela
+    const linhas = document.querySelectorAll("#vendasDiaBody tr");
+    let conteudo = "Relatório de Vendas do Dia\n\n";
 
-  linhas.forEach(linha => {
-    const colunas = linha.querySelectorAll("td");
-    conteudo += `Horário: ${colunas[0].innerText} | Produto: ${colunas[1].innerText} | Quantidade: ${colunas[2].innerText} | Receita: ${colunas[3].innerText}\n\n\n`;
+    let somaLucro = 0;
+
+    linhas.forEach(linha => {
+      const colunas = linha.querySelectorAll("td");
+      if (colunas.length === 5) {
+        const hora = colunas[0].innerText;
+        const produto = colunas[1].innerText;
+        const quantidade = colunas[2].innerText;
+        const receita = colunas[3].innerText;
+        const lucro = colunas[4].innerText;
+
+        conteudo += `Horário: ${hora} | Produto: ${produto} | Quantidade: ${quantidade} | Receita: ${receita} | Lucro: ${lucro}\n`;
+
+        // Converte lucro para número e soma
+        const valorNumerico = Number(lucro.replace(/[^\d,-]/g, "").replace(",", "."));
+        somaLucro += isNaN(valorNumerico) ? 0 : valorNumerico;
+      }
+    });
+
+    // 👉 Adiciona o total de lucros ao final
+    conteudo += `\n=============================\nLucro Total do Dia: ${somaLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}\n`;
+
+    // Cria um arquivo blob (texto simples)
+    const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    // Cria link temporário
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "relatorio_vendas.txt"; 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Libera o objeto da memória
+    URL.revokeObjectURL(url);
   });
-
-  // Cria um arquivo blob
- 
-  const blob = new Blob([conteudo], { type: "application/msword"});
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "vendas_do_dia.txt"; // .txt aquivo de texto comum e .doc word //
-  link.click();
-});
-
-
 
 
 
