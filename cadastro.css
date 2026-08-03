@@ -1,6 +1,10 @@
 body {
   font-family: Arial, sans-serif;
-  background-image: url("stockcake.jpg");
+ background-image: linear-gradient(
+    to bottom,
+    rgb(34, 107, 83),
+    rgb(255, 200, 87)
+  );
   background-repeat: no-repeat;
   background-size: cover;
   display: flex;
@@ -8,6 +12,15 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
+}
+
+.logo {
+  position: absolute;
+  top: 20px;
+  left: 500px;
+  border-radius: 120px;
+  width: 350px;
+  height: auto;
 }
 
 .login-container {

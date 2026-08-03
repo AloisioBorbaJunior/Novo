@@ -1,6 +1,6 @@
 :root {
   --bg-page: #f9f8f5;
-  --bg-image: url('Logo\ nova.png');
+  --bg-image: url('Logo-Transparente.png');
   --surface-1: #daddd9;
   --surface-2: #f1efe8;
   --text-primary: #0b0b0b;
@@ -21,6 +21,23 @@
 
 * {
   box-sizing: border-box;
+}
+.header{
+ 
+  background-image: linear-gradient(315deg, #528172 0%, #8eb4b8 74%);
+  color: rgb(0, 0, 0);
+  text-align: center;
+  max-width: 100%;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 20px 5px rgba(0,0,0,0.2);
+  max-width: 1200px;
+  margin-left: 65px;
+font-style: italic;
+  font-size: 35px;
+  font-weight: bold;
+
 }
 
 body {

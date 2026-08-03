@@ -25,7 +25,13 @@ function lerArquivo(caminhoArquivo) {
 const server = http.createServer((req, res) => {
     mostrarMensagem(`Requisição recebida: ${req.method} ${req.url}`);
 
-    const urlPath = req.url === '/' ? '/index.html' : req.url;
+    const requestUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    let urlPath = requestUrl.pathname;
+
+    if (urlPath === '/') {
+        urlPath = '/Login.html';
+    }
+
     const filePath = path.join(__dirname, urlPath);
 
     fs.readFile(filePath, (erro, dados) => {
