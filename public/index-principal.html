@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Vendas - Balanço Diário</title>
+  <link rel="stylesheet" href="style.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+</head>
+<body>
+
+
+  <header class="header">Sistema de Vendas</header>
+  
+
+     
+<div class="dashboard"></div>
+    <!-- Navegação por abas -->
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="balanco"><i class="ti ti-chart-bar"></i> Balanço</button>
+      <button class="tab-btn" data-tab="vendas"><i class="ti ti-shopping-cart"></i> Vendas</button>
+      <button class="tab-btn" data-tab="produtos"><i class="ti ti-boxes"></i> Produtos</button>
+    </nav>
+
+    <!-- ===================== ABA BALANÇO DO DIA ===================== -->
+    <section class="tab-content active" id="tab-balanco">
+
+      <div class="filter-row">
+        <label for="dataFiltro">Dia de referência</label>
+        <input type="date" id="dataFiltro">
+      </div>
+
+      <section class="metrics-grid">
+        <div class="card metric-card">
+          <p class="metric-label"><i class="ti ti-cash"></i> Receita do dia</p>
+          <p class="metric-value" id="dReceita">R$ 0,00</p>
+        
+        </div>
+        <div class="card metric-card">
+          <p class="metric-label"><i class="ti ti-truck-delivery"></i> Custo do dia</p>
+          <p class="metric-value" id="dCusto">R$ 0,00</p>
+        </div>
+        <div class="card metric-card">
+          <p class="metric-label"><i class="ti ti-trending-up"></i> Lucro do dia</p>
+          <p class="metric-value" id="dLucro">R$ 0,00</p>
+        </div>
+        <div class="card metric-card">
+          <p class="metric-label"><i class="ti ti-package"></i> Itens vendidos</p>
+          <p class="metric-value" id="dItens">0</p>
+        </div>
+      </section>
+
+      <section class="card chart-card">
+        <p class="card-title">Receita por produto no dia</p>
+        <div class="chart-wrapper" style="height: 240px;">
+          <canvas id="receitaProdutoChart" role="img" aria-label="Gráfico de barras da receita por produto no dia selecionado"></canvas>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="card-title">Vendas do dia</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Produto</th>
+                <th>Qtd.</th>
+                <th class="right">Valor</th>
+                <th class="right">Lucro</th>
+              </tr>
+            </thead>
+            <tbody id="vendasDiaBody"></tbody>
+          </table>
+        </div>
+        <p class="empty-msg" id="vendasDiaVazio" style="display:none;">Nenhuma venda registrada neste dia.</p>
+        <div class="form-field form-field-btn">
+
+  <button id="downloadBtn" class="btn-download"><i class="ti ti-download"></i> Baixar Balanço do Dia</button>
+</div>
+      </section>
+
+    </section>
+
+    <!-- ===================== ABA VENDAS ===================== -->
+    <section class="tab-content" id="tab-vendas">
+
+      <section class="card">
+        <p class="card-title">Registrar venda</p>
+        <form id="formVenda" class="form-grid">
+          <div class="form-field">
+            <label for="vendaProduto">Produto</label>
+            <select id="vendaProduto" required></select>
+          </div>
+          <div class="form-field">
+            <label for="vendaQtd">Quantidade</label>
+            <input type="number" id="vendaQtd" min="1" step="1" required>
+          </div>
+          <div class="form-field">
+            <label for="vendaData">Data</label>
+            <input type="date" id="vendaData" required>
+          </div>
+          <div class="form-field">
+            <label for="vendaHora">Hora</label>
+            <input type="time" id="vendaHora" required>
+          </div>
+          <div class="form-field form-field-btn">
+            <button type="submit" class="btn-primary"><i class="ti ti-plus"></i> Registrar venda</button>
+          </div>
+        </form>
+        <p class="form-msg" id="vendaMsg"></p>
+      </section>
+
+      <section class="card">
+        <p class="card-title">Histórico de vendas</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Hora</th>
+                <th>Produto</th>
+                <th>Qtd.</th>
+                <th class="right">Valor unit.</th>
+                <th class="right">Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="vendasBody"></tbody>
+          </table>
+        </div>
+        <p class="empty-msg" id="vendasVazio" style="display:none;">Nenhuma venda registrada ainda.</p>
+        
+      </section>
+
+    </section>
+
+    <!-- ===================== ABA PRODUTOS ===================== -->
+    <section class="tab-content" id="tab-produtos">
+
+      <section class="card">
+        <p class="card-title">Cadastrar produto</p>
+        <form id="formProduto" class="form-grid">
+          <div class="form-field">
+            <label for="prodNome">Nome do produto</label>
+            <input type="text" id="prodNome" placeholder="Ex: Fone Bluetooth X1" required>
+          </div>
+          <div class="form-field">
+            <label for="prodCusto">Preço de custo (R$)</label>
+            <input type="number" id="prodCusto" min="0" step="0.01" required>
+          </div>
+          <div class="form-field">
+            <label for="prodVenda">Preço de venda (R$)</label>
+            <input type="number" id="prodVenda" min="0" step="0.01" required>
+          </div>
+          <div class="form-field">
+            <label for="prodQtd">Quantidade em estoque</label>
+            <input type="number" id="prodQtd" min="0" step="1" required>
+          </div>
+          <div class="form-field form-field-btn">
+            <button type="submit" class="btn-primary"><i class="ti ti-plus"></i> Cadastrar produto</button>
+          </div>
+        </form>
+        <p class="form-msg" id="produtoMsg"></p>
+      </section>
+
+      <section class="card">
+        <p class="card-title">Produtos cadastrados</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th class="right">Custo</th>
+                <th class="right">Venda</th>
+                <th class="right">Estoque</th>
+                <th class="right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="produtosBody"></tbody>
+          </table>
+        </div>
+        <p class="empty-msg" id="produtosVazio" style="display:none;">Nenhum produto cadastrado ainda.</p>
+      </section>
+
+    </section>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>

@@ -9,6 +9,33 @@ const requestedPort = Number(process.argv[2]) || Number(process.env.PORT) || 300
 let PORT = requestedPort;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
+function resolveFilePath(urlPath) {
+    const normalizedPath = urlPath === '/' ? '/Login.html' : urlPath;
+    const candidatePaths = [
+        path.join(PUBLIC_DIR, normalizedPath),
+        path.join(__dirname, normalizedPath)
+    ];
+
+    for (const candidatePath of candidatePaths) {
+        if (fs.existsSync(candidatePath)) {
+            return candidatePath;
+        }
+
+        const parentDir = path.dirname(candidatePath);
+        const fileName = path.basename(candidatePath);
+
+        if (fs.existsSync(parentDir)) {
+            const entries = fs.readdirSync(parentDir);
+            const match = entries.find((entry) => entry.toLowerCase() === fileName.toLowerCase());
+            if (match) {
+                return path.join(parentDir, match);
+            }
+        }
+    }
+
+    return path.join(PUBLIC_DIR, normalizedPath);
+}
+
 // ===== Funções Auxiliares =====
 function mostrarMensagem(msg) {
     console.log(`[${new Date().toLocaleTimeString('pt-BR')}] ${msg}`);
@@ -30,10 +57,16 @@ const server = http.createServer((req, res) => {
     let urlPath = requestUrl.pathname;
 
     if (urlPath === '/') {
-        urlPath = '/login.html';
+        urlPath = '/Login.html';
+    } else if (urlPath === '/index-principal') {
+        urlPath = '/index-principal.html';
+    } else if (urlPath === '/login') {
+        urlPath = '/Login.html';
+    } else if (urlPath === '/cadastro') {
+        urlPath = '/cadastro.html';
     }
 
-    const filePath = path.join(PUBLIC_DIR, urlPath);
+    const filePath = resolveFilePath(urlPath);
 
     fs.readFile(filePath, (erro, dados) => {
         if (erro) {
