@@ -7,6 +7,7 @@ const path = require('path');
 const HOSTNAME = '0.0.0.0';
 const requestedPort = Number(process.argv[2]) || Number(process.env.PORT) || 3000;
 let PORT = requestedPort;
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // ===== Funções Auxiliares =====
 function mostrarMensagem(msg) {
@@ -29,10 +30,10 @@ const server = http.createServer((req, res) => {
     let urlPath = requestUrl.pathname;
 
     if (urlPath === '/') {
-        urlPath = '/Login.html';
+        urlPath = '/login.html';
     }
 
-    const filePath = path.join(__dirname, urlPath);
+    const filePath = path.join(PUBLIC_DIR, urlPath);
 
     fs.readFile(filePath, (erro, dados) => {
         if (erro) {
