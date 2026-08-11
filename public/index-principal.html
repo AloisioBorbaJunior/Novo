@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Vendas - Balanço Diário</title>
+  <title>Controle Clóvis Gás - Balanço Diário</title>
   <link rel="stylesheet" href="style.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
  <link rel="icon" type="image/png" href="/logo-nova.png">
@@ -21,8 +21,69 @@
       <button class="tab-btn active" data-tab="balanco"><i class="ti ti-chart-bar"></i> Balanço</button>
       <button class="tab-btn" data-tab="vendas"><i class="ti ti-shopping-cart"></i> Vendas</button>
       <button class="tab-btn" data-tab="produtos"><i class="ti ti-boxes"></i> Produtos</button>
+      <button class="tab-btn" data-tab="despesas"><i class="ti ti-report-money"></i> Despesas</button>
     </nav>
 
+   <!-- ===================== ABA DESPESAS ===================== -->
+<section class="tab-content" id="tab-despesas">
+
+  <section class="card">
+    <p class="card-title">Registrar despesa</p>
+    <form id="formDespesa" class="form-grid">
+      <div class="form-field">
+        <label for="despesaNome">Descrição</label>
+        <input type="text" id="despesaNome" placeholder="Ex: Aluguel, Energia, Marketing" required>
+      </div>
+      <div class="form-field">
+        <label for="despesaValor">Valor (R$)</label>
+        <input type="number" id="despesaValor" min="0" step="0.01" required>
+      </div>
+      <div class="form-field">
+        <label for="despesaData">Data</label>
+        <input type="date" id="despesaData" required>
+      </div>
+      <div class="form-field form-field-btn">
+        <button type="submit" class="btn-primary"><i class="ti ti-plus"></i> Registrar despesa</button>
+      </div>
+    </form>
+    <p class="form-msg" id="despesaMsg"></p>
+  </section>
+
+  <section class="card">
+    <p class="card-title">Despesas do mês</p>
+    <div class="table">
+      <table>
+        <thead>
+          <tr>
+            <th class="right">Hora</th>
+            <th class="right">Data</th>
+            <th Class="right">Descrição</th>
+            <th class="right">Valor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="despesasBody"></tbody>
+      </table>
+    </div>
+    <p class="empty-msg" id="despesasVazio" style="display:none;">Nenhuma despesa registrada ainda.</p>
+  </section>
+
+  <section class="display-metrics">
+  <div class="display-card">
+    <p class="metric-label"><i class="ti ti-cash"></i> Total de despesas</p>
+    <p class="metric-value" id="mDespesas">R$ 0,00</p>
+  </div>
+
+  <div class="display-card">
+    <p class="metric-label"><i class="ti ti-trending-up"></i> Lucro do dia</p>
+    <p class="metric-value" id="dLucroDespesa">R$ 0,00</p>
+  </div>
+</section>
+
+
+</section>
+
+   
     <!-- ===================== ABA BALANÇO DO DIA ===================== -->
     <section class="tab-content active" id="tab-balanco">
 
@@ -42,8 +103,8 @@
           <p class="metric-value" id="dCusto">R$ 0,00</p>
         </div>
         <div class="card metric-card">
-          <p class="metric-label"><i class="ti ti-trending-up"></i> Lucro do dia</p>
-          <p class="metric-value" id="dLucro">R$ 0,00</p>
+        <p class="metric-label"><i class="ti ti-trending-up"></i> Lucro do dia</p>
+        <p class="metric-value" id="dLucro">R$ 0,00</p>
         </div>
         <div class="card metric-card">
           <p class="metric-label"><i class="ti ti-package"></i> Itens vendidos</p>
