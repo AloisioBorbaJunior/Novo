@@ -27,6 +27,11 @@ async function register() {
   }
 }
 
+document.getElementById('registerForm')?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  register();
+});
+
 async function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;

@@ -13,9 +13,11 @@
 
   <div class="login-container">
     <h2>Cadastro</h2>
-    <input type="text" id="newUser" placeholder="Novo usuário">
-    <input type="password" id="newPass" placeholder="Nova senha">
-    <button onclick="register()">Cadastrar</button>
+    <form id="registerForm">
+      <input type="text" id="newUser" name="username" placeholder="Novo usuário" autocomplete="username" required>
+      <input type="password" id="newPass" name="new-password" placeholder="Nova senha" autocomplete="new-password" required>
+      <button type="submit">Cadastrar</button>
+    </form>
     <p id="register-message" class="error"></p>
     <p>Já tem conta? <a href="Login.html">Faça login</a></p>
   </div>
