@@ -40,6 +40,11 @@ async function login() {
   }
 }
 
+document.getElementById('loginForm')?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  login();
+});
+
 async function logout() {
   try {
     const response = await fetch('/api/auth/logout', { method: 'POST' });
