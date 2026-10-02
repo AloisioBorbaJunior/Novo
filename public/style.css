@@ -23,23 +23,73 @@
 * {
   box-sizing: border-box;
 }
-.header{
- 
-  background-image: linear-gradient(315deg, #528172 0%, #8eb4b8 74%);
-  color: rgb(0, 0, 0);
-  text-align: center;
-  max-width: 100%;
-  padding: 20px;
-  margin-top: 20px;
-  border-radius: 10px;
-  box-shadow: 0 20px 5px rgba(0,0,0,0.2);
-  max-width: 1200px;
-  margin-left: 65px;
-font-style: italic;
-  font-size: 35px;
-  font-weight: bold;
+
+html {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Estilo da barra de navegação */
+.navbar {
+  background-color: #4080c0; /* cor de fundo da barra */
+  box-shadow: #000000 0px 4px 6px -1px, #000000 0px 2px 4px -1px; /* sombra */
+  padding: 10px 20px; /* espaçamento interno */
+}
+
+/* Ajusta o texto dentro da navbar */
+.navbar .navbar-text {
+  color: #000000; /* tom mais claro para o texto */
+  font-size: 25px; /* tamanho da fonte */
+  font-weight: bold; /* deixa o texto em negrito */
 
 }
+
+/* Ajusta o link "Sair" */
+.navbar .navbar-brand {
+  color: #fff;              /* cor do link */
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navbar .navbar-brand:hover {
+  color: #f00d0d;           /* cor ao passar o mouse */
+}
+
+.container {
+  width: 100%;
+  max-width: none;
+  padding: 1px;
+  box-shadow: 0 10px 3px rgba(0, 0, 0, 0.1);
+  background-color: #a6cfb7;
+  border-radius: 10px;
+}
+
+.navbar img {
+  display: block;
+  width: auto;
+  max-width: min(180px, 25vw);
+  height: auto;
+  max-height: 72px;
+  margin: 0;
+  object-fit: contain;
+}
+
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.navbar .navbar-text {
+  margin: 0;
+  text-align: center;
+}
+
+.navbar .navbar-brand:last-child {
+  flex: 0 0 auto;
+}
+
 
 body {
   position: relative;
@@ -57,7 +107,7 @@ body {
 .display-metrics {
   display: flex;       /* coloca os cards em linha */
   gap: 5px;            /* espaço pequeno entre eles */
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   color: var(--text-tcr);  /* mantém na mesma linha */
 }
 
@@ -66,9 +116,34 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, rgb(240, 248, 255), rgb(200, 230, 255));
-  min-width: 300px;
-  margin: 55px;   /* reduzi a margem para não ficar tão afastado */
+  min-width: 0;
+  flex: 1 1 240px;
+  margin: 0;
   padding: 16px;
+}
+
+#tab-despesas .display-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+#tab-despesas .display-card {
+  min-width: 0;
+  margin: 0;
+}
+
+#tab-despesas .table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#tab-despesas .table table {
+  min-width: 480px;
 }
 .dashboard {
   max-width: 960px;
@@ -85,6 +160,7 @@ body {
 /* Abas */
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
@@ -96,11 +172,11 @@ body {
   background-repeat: no-repeat;
   border-radius: 12px;
   border: none;
-  margin-left: 20px;
+  margin-left: 0;
   padding: 10px 10px;
   cursor: pointer;
   align-items: center;
-  gap: 40px;
+  gap: 8px;
    font-size: 20px;
   color: #0a0c0c;
 
@@ -133,8 +209,8 @@ body {
   border: 1px solid var(--border);
   padding: 15px;
   margin-bottom: 1.25rem;
-  width: 1218px;
-  margin-left: 50px;
+  width: 100%;
+  margin-left: 0;
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -156,7 +232,7 @@ body {
 .filter-row label {
   font-size: 18px;
   color: var(--text-secondary);
-  margin-left: 20px;
+  margin-left: 0;
 }
 
 .filter-row input[type="month"] {
@@ -180,7 +256,7 @@ body {
 .metric-card {
   margin-bottom: 0;
   padding: 1rem;
-  width: 200px;
+  width: auto;
 }
 
 .metric-label {
@@ -295,6 +371,8 @@ body {
 /* Tabela */
 .table-wrapper {
   overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -368,3 +446,118 @@ td.right {
   background: linear-gradient(90deg, #2ecc71, #27ae60);
 }
 
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 12px;
+  }
+
+  .navbar .container {
+    gap: 0.5rem;
+  }
+
+  .navbar .navbar-text {
+    flex: 1 1 auto;
+    font-size: clamp(14px, 3.5vw, 20px);
+    line-height: 1.25;
+  }
+
+  .navbar img {
+    max-width: 100px;
+    max-height: 56px;
+  }
+
+  .navbar .navbar-brand:last-child {
+    font-size: 14px;
+  }
+
+  .dashboard {
+    padding: 1rem 0.75rem 2rem;
+  }
+
+  .tabs {
+    gap: 6px;
+  }
+
+  .tab-btn {
+    flex: 1 1 calc(50% - 6px);
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: 16px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar .container {
+    flex-wrap: wrap;
+  }
+
+  .navbar img {
+    max-width: 76px;
+    max-height: 48px;
+  }
+
+  .navbar .navbar-text {
+    order: 3;
+    flex-basis: 100%;
+    font-size: 16px;
+  }
+
+  .dashboard {
+    padding: 0.75rem 0.5rem 1.5rem;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .metric-value {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+
+  .filter-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter-row input {
+    max-width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form-field input,
+  .form-field select {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .form-field-btn,
+  .form-field-btn .btn-primary,
+  .btn-download {
+    width: 100%;
+  }
+
+  table {
+    min-width: 520px;
+  }
+
+  .display-card {
+    flex-basis: 100%;
+  }
+
+  #tab-despesas .display-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

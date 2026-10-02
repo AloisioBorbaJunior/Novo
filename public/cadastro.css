@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
  background-image: linear-gradient(
@@ -10,16 +14,18 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100svh;
   margin: 0;
+  padding: 24px;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .logo {
-  position: absolute;
-  top: 20px;
-  left: 500px;
+  display: block;
   border-radius: 120px;
-  width: 350px;
+  width: min(350px, 80vw);
   height: auto;
 }
 
@@ -28,7 +34,7 @@ body {
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  width: 300px;
+  width: min(100%, 360px);
 }
 
 .login-container h2 {
@@ -64,4 +70,35 @@ body {
   color: red;
   font-size: 14px;
   text-align: center;
+}
+
+@media (max-width: 480px) {
+  body {
+    justify-content: center;
+    padding: 20px 16px;
+    gap: 16px;
+  }
+
+  .logo {
+    width: min(260px, 72vw);
+  }
+
+  .login-container {
+    padding: 24px 20px;
+  }
+
+  .login-container input {
+    width: 100%;
+    margin: 8px 0;
+  }
+}
+
+@media (max-height: 560px) {
+  body {
+    justify-content: flex-start;
+  }
+
+  .logo {
+    width: min(180px, 35vw);
+  }
 }

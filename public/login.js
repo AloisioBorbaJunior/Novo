@@ -1,31 +1,53 @@
-// Função de cadastro
-function register() {
-  const user = document.getElementById("newUser").value;
-  const pass = document.getElementById("newPass").value;
-  const message = document.getElementById("register-message");
+async function sendAuthRequest(endpoint, username, password) {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'Não foi possível concluir a solicitação.');
+  return result;
+}
 
-  if (user && pass) {
-    // Salva no localStorage
-    localStorage.setItem(user, pass);
-    message.style.color = "green";
-    message.textContent = "Usuário cadastrado com sucesso!";
-  } else {
-    message.style.color = "red";
-    message.textContent = "Preencha todos os campos!";
+function showMessage(element, text, isError = true) {
+  element.style.color = isError ? 'red' : 'green';
+  element.textContent = text;
+}
+
+async function register() {
+  const username = document.getElementById('newUser').value;
+  const password = document.getElementById('newPass').value;
+  const message = document.getElementById('register-message');
+
+  try {
+    const result = await sendAuthRequest('/api/auth/register', username, password);
+    showMessage(message, result.message, false);
+  } catch (error) {
+    showMessage(message, error.message);
   }
 }
 
-// Função de login
-function login() {
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
-  const errorMessage = document.getElementById("error-message");
+async function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const message = document.getElementById('error-message');
 
-  const savedPass = localStorage.getItem(user);
-
-  if (savedPass && savedPass === pass) {
-    window.location.href = "index-principal.html";
-  } else {
-    errorMessage.textContent = "Usuário ou senha incorretos!";
+  try {
+    const result = await sendAuthRequest('/api/auth/login', username, password);
+    window.location.assign(result.redirect);
+  } catch (error) {
+    showMessage(message, error.message);
   }
 }
+
+async function logout() {
+  try {
+    const response = await fetch('/api/auth/logout', { method: 'POST' });
+    if (!response.ok) throw new Error('Não foi possível encerrar a sessão.');
+    window.location.assign('/login');
+  } catch (error) {
+    window.alert(error.message);
+  }
+}
+
+document.getElementById('logoutBtn')?.addEventListener('click', logout);

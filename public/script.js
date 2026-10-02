@@ -1,5 +1,5 @@
 // ==========================================
-// Armazenamento local (os dados ficam salvos no navegador)
+// Produtos são carregados pela API; vendas e despesas continuam no navegador.
 // ==========================================
 
 const STORAGE_PRODUTOS = 'balanco_produtos';
@@ -17,20 +17,78 @@ const STORAGE_DESPESAS = 'balanco_despesas';
 
 
 
-function carregarProdutos() {
-  const dados = localStorage.getItem(STORAGE_PRODUTOS);
-  if (dados) return JSON.parse(dados);
+async function requisitarProdutos(caminho, options = {}) {
+  const response = await fetch(caminho, {
+    ...options,
+    headers: {
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...options.headers
+    }
+  });
+  const result = response.status === 204 ? null : await response.json();
+  if (!response.ok) {
+    if (response.status === 401) window.location.assign('/login');
+    throw new Error(result?.error || 'Não foi possível salvar os produtos no servidor.');
+  }
+  return result;
+}
 
+async function carregarProdutosDoServidor() {
+  let result = await requisitarProdutos('/api/produtos');
+  if (result.produtos.length > 0) return result.produtos;
+
+  const dadosLocais = localStorage.getItem(STORAGE_PRODUTOS);
+  if (!dadosLocais) return [];
+
+  let produtosLocais;
+  try {
+    produtosLocais = JSON.parse(dadosLocais);
+  } catch {
+    throw new Error('Os produtos salvos neste navegador estão inválidos; não foi feita nenhuma alteração.');
+  }
+
+  if (!Array.isArray(produtosLocais) || produtosLocais.length === 0) return [];
+  if (!window.confirm(`Encontrei ${produtosLocais.length} produto(s) salvos neste navegador. Deseja importá-los para esta conta?`)) {
+    return [];
+  }
+
+  result = await requisitarProdutos('/api/produtos/import', {
+    method: 'POST',
+    body: JSON.stringify({ produtos: produtosLocais })
+  });
+  localStorage.removeItem(STORAGE_PRODUTOS);
+  return result.produtos;
+}
+
+async function criarProdutoNoServidor(produto) {
+  const result = await requisitarProdutos('/api/produtos', {
+    method: 'POST',
+    body: JSON.stringify(produto)
+  });
+  return result.produto;
+}
+
+async function atualizarProdutoNoServidor(produto) {
+  const result = await requisitarProdutos(`/api/produtos/${produto.id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      nome: produto.nome,
+      custo: produto.custo,
+      venda: produto.venda,
+      quantidade: produto.quantidade
+    })
+  });
+  return result.produto;
+}
+
+async function excluirProdutoNoServidor(id) {
+  await requisitarProdutos(`/api/produtos/${id}`, { method: 'DELETE' });
 }
 
 function carregarVendas() {
   const dados = localStorage.getItem(STORAGE_VENDAS);
   if (dados) return JSON.parse(dados);
   return [];
-}
-
-function salvarProdutos() {
-  localStorage.setItem(STORAGE_PRODUTOS, JSON.stringify(produtos));
 }
 
 function salvarVendas() {
@@ -49,10 +107,9 @@ function salvarDespesas() {
   localStorage.setItem(STORAGE_DESPESAS, JSON.stringify(despesas));
 }
 
-let produtos = carregarProdutos();
+let produtos = [];
 let vendas = carregarVendas();
 let despesas = carregarDespesas();
-let proximoIdProduto = produtos.length ? Math.max(...produtos.map(p => p.id)) + 1 : 1;
 let proximoIdVenda = vendas.length ? Math.max(...vendas.map(v => v.id)) + 1 : 1;
 
 let receitaProdutoChart = null;
@@ -141,17 +198,22 @@ function renderProdutos() {
   `).join('');
 }
 
-function removerProduto(id) {
-  if (!confirm) return;
-  produtos = produtos.filter(p => p.id !== id);
-  salvarProdutos();
-  renderProdutos();
-  renderSelectVendaProduto();
+async function removerProduto(id) {
+  if (!window.confirm('Deseja remover este produto?')) return;
+
+  try {
+    await excluirProdutoNoServidor(id);
+    produtos = produtos.filter(p => p.id !== id);
+    renderProdutos();
+    renderSelectVendaProduto();
+  } catch (error) {
+    mostrarMsg('produtoMsg', error.message, 'error');
+  }
 }
 
 function inicializarFormProduto() {
   const form = document.getElementById('formProduto');
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const nome = document.getElementById('prodNome').value.trim();
@@ -164,13 +226,16 @@ function inicializarFormProduto() {
       return;
     }
 
-    produtos.push({ id: proximoIdProduto++, nome, custo, venda, quantidade });
-    salvarProdutos();
-
-    form.reset();
-    renderProdutos();
-    renderSelectVendaProduto();
-    mostrarMsg('produtoMsg', 'Produto cadastrado com sucesso.', 'success');
+    try {
+      const produto = await criarProdutoNoServidor({ nome, custo, venda, quantidade });
+      produtos.push(produto);
+      form.reset();
+      renderProdutos();
+      renderSelectVendaProduto();
+      mostrarMsg('produtoMsg', 'Produto salvo na sua conta.', 'success');
+    } catch (error) {
+      mostrarMsg('produtoMsg', error.message, 'error');
+    }
   });
 }
 
@@ -316,15 +381,26 @@ function renderVendas() {
   `).join('');
 }
 
-function removerVenda(id) {
-  if (!confirm) return;
+async function removerVenda(id) {
+  if (!window.confirm('Deseja remover esta venda?')) return;
+
   const venda = vendas.find(v => v.id === id);
   if (venda) {
     const produto = produtos.find(p => p.id === venda.produtoId);
-    if (produto) produto.quantidade += venda.quantidade;
+    if (produto) {
+      try {
+        const produtoAtualizado = await atualizarProdutoNoServidor({
+          ...produto,
+          quantidade: produto.quantidade + venda.quantidade
+        });
+        Object.assign(produto, produtoAtualizado);
+      } catch (error) {
+        mostrarMsg('vendaMsg', error.message, 'error');
+        return;
+      }
+    }
   }
   vendas = vendas.filter(v => v.id !== id);
-  salvarProdutos();
   salvarVendas();
   renderProdutos();
   renderSelectVendaProduto();
@@ -346,7 +422,7 @@ function inicializarFormVenda() {
   document.getElementById('vendaHora').value = horaAgora();
 
   const form = document.getElementById('formVenda');
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const produtoId = parseInt(document.getElementById('vendaProduto').value, 10);
@@ -369,9 +445,17 @@ function inicializarFormVenda() {
       return;
     }
 
-    produto.quantidade -= quantidade;
-
     const lucroVenda = (produto.venda - produto.custo) * quantidade;
+    try {
+      const produtoAtualizado = await atualizarProdutoNoServidor({
+        ...produto,
+        quantidade: produto.quantidade - quantidade
+      });
+      Object.assign(produto, produtoAtualizado);
+    } catch (error) {
+      mostrarMsg('vendaMsg', error.message, 'error');
+      return;
+    }
 
     vendas.push({
       id: proximoIdVenda++,
@@ -386,7 +470,6 @@ function inicializarFormVenda() {
       hora
     });
 
-    salvarProdutos();
     salvarVendas();
 
     form.reset();
@@ -524,12 +607,18 @@ function inicializarFiltroData() {
 // Inicialização geral
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   inicializarAbas();
   inicializarFormProduto();
   inicializarFormVenda();
   inicializarFiltroData();
   inicializarFormDespesa();
+
+  try {
+    produtos = await carregarProdutosDoServidor();
+  } catch (error) {
+    mostrarMsg('produtoMsg', error.message, 'error');
+  }
 
   renderProdutos();
   renderSelectVendaProduto();
@@ -589,7 +678,4 @@ conteudo += `\n=============================\nTotal de Despesas: ${somaDespesas.
     // Libera o objeto da memória
     URL.revokeObjectURL(url);
   });
-
-
-
 
